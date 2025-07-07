@@ -1,0 +1,19 @@
+# Development Environment Template
+# Copy this file and rename to application-dev.properties
+
+# Profile Configuration
+spring.profiles.active=dev
+
+spring.application.name=store
+server.port=8080
+
+# Database Configuration (Replace with your values)
+spring.datasource.url=jdbc:mysql://localhost:3306/test
+spring.datasource.username=YOUR_DATABASE_USERNAME
+spring.datasource.password=YOUR_DATABASE_PASSWORD
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
