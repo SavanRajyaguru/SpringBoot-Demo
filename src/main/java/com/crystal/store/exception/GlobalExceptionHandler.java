@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex, WebRequest request) {
         logger.error("Data integrity violation: {} - Request: {}", ex.getMessage(), request.getDescription(false));
 
-        String message = "Data integrity violation. Please check your input.";
+        String message = ex.getMessage();
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT, message);
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }

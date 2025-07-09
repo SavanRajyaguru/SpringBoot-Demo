@@ -32,7 +32,7 @@ public class UserModel {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_type", nullable = false)
+    @Column(name = "user_type", nullable = false, columnDefinition = "ENUM('ADMIN', 'USER') DEFAULT 'USER'")
     private UserType userType;
 
     @Enumerated(EnumType.STRING)
@@ -62,6 +62,14 @@ public class UserModel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public UserType getUserType() {

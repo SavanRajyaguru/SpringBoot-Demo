@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +19,8 @@ import com.crystal.store.model.UserModel;
 import com.crystal.store.services.UserService;
 import com.crystal.store.utils.ValidationUtils;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -28,14 +29,22 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<ResponseModel> createUser(@Validated @RequestBody UserModel user) {
+    public ResponseEntity<ResponseModel> createUser(@Valid @RequestBody UserModel user) {
+        System.out.println(user.getPassword());
         // Additional email validation
         if (!ValidationUtils.isValidEmail(user.getEmail())) {
             return ResponseEntity.badRequest()
                     .body(new ResponseModel(HttpStatus.BAD_REQUEST, "Invalid email format", null,
                             HttpStatus.BAD_REQUEST.value()));
         }
-
+        ValidationUtils.ValidationResult passwordValidation = ValidationUtils.validatePassword(user.getPassword());
+        System.out.println(passwordValidation.isValid());
+        if (!passwordValidation.isValid()) {
+            String errorMessage = passwordValidation.getErrors();
+            return ResponseEntity.badRequest()
+                    .body(new ResponseModel(HttpStatus.BAD_REQUEST, errorMessage, null,
+                            HttpStatus.BAD_REQUEST.value()));
+        }
         UserModel createdUser = userService.createUser(user);
         return ResponseEntity
                 .ok(new ResponseModel(HttpStatus.OK, "User created successfully", createdUser, HttpStatus.OK.value()));

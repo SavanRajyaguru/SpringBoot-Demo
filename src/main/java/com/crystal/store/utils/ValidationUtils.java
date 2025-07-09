@@ -45,4 +45,32 @@ public class ValidationUtils {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
         return email.matches(emailRegex);
     }
+
+    public static ValidationResult validatePassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            return new ValidationResult(false, "Password is required");
+        }
+        if (password.length() < 6) {
+            return new ValidationResult(false, "Password must be at least 6 characters long");
+        }
+        return new ValidationResult(true, "Password is valid");
+    }
+
+    public static class ValidationResult {
+        private final boolean isValid;
+        private final String errors;
+
+        public ValidationResult(boolean isValid, String errors) {
+            this.isValid = isValid;
+            this.errors = errors;
+        }
+
+        public boolean isValid() {
+            return isValid;
+        }
+
+        public String getErrors() {
+            return errors;
+        }
+    }
 }
