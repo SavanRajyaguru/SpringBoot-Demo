@@ -5,7 +5,6 @@ import java.security.Key;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.jsonwebtoken.*;
@@ -19,22 +18,29 @@ public class JWTConfig {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    @Bean
     public String generateToken(Object data) {
         Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        System.out.println(key);
         String jwtToken = Jwts.builder()
-                .subject(data.toString())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .setSubject(data.toString())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
         return jwtToken;
     }
 
-    // @Bean
-    // public String validateToken(String token) {
-    // Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    // return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-    // }
+    public String extractDataFromToken(String token) {
+        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return claims.getBody().getSubject();
+    }
 
+    public boolean validateToken(String token) {
+        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
