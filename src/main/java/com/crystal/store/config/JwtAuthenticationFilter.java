@@ -1,6 +1,7 @@
 package com.crystal.store.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,8 +24,13 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JWTConfig jwtConfig;
+
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public JwtAuthenticationFilter(@Lazy UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,

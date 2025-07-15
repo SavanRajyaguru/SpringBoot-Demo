@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crystal.store.exception.ResourceNotFoundException;
@@ -13,15 +12,17 @@ import com.crystal.store.enums.Enums.UserType;
 import com.crystal.store.exception.InternalServerErrorException;
 import com.crystal.store.model.UserModel;
 import com.crystal.store.repository.UserRepository;
+import com.crystal.store.utils.Helper;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * Create a new user
@@ -31,7 +32,7 @@ public class UserService {
 
             throw new DataIntegrityViolationException("User with this email already exists");
         }
-        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        String encryptedPassword = Helper.passwordEncoder().encode(user.getPassword());
         user.setPassword(encryptedPassword);
         if (user.getUserType() == null) {
             user.setUserType(UserType.USER);

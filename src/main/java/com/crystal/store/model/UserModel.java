@@ -20,6 +20,11 @@ public class UserModel {
     @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
 
+    @Column(name = "username")
+    @NotBlank(message = "Username is required")
+    @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters")
+    private String username;
+
     // unique email
     @Column(name = "email", unique = true, nullable = false)
     @NotBlank(message = "Email is required")
@@ -86,5 +91,13 @@ public class UserModel {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
