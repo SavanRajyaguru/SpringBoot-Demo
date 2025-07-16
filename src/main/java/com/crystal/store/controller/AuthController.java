@@ -65,9 +65,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest loginRequest) {
-        // Find user by username
-        System.out.println("Username: " + loginRequest.getUsername());
-        UserModel user = userService.findByUsername(loginRequest.getUsername());
+
+        // Find user by email
+        System.out.println("Email: " + loginRequest.getEmail());
+        UserModel user = userService.findByEmail(loginRequest.getEmail());
         System.out.println("User: " + user);
 
         // Check if user exists and password is correct

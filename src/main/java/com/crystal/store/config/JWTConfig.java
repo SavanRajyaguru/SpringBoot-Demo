@@ -21,9 +21,8 @@ public class JWTConfig {
 
     public String generateToken(Map<String, String> data) {
         Key key = getSigningKey();
-        System.out.println("Key: " + key);
         String jwtToken = Jwts.builder()
-                .setSubject(data.toString())
+                .setClaims(data)
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 24 * 60 * 60 * 1000))
                 .signWith(key)
                 .compact();

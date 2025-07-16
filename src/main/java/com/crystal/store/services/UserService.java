@@ -12,14 +12,12 @@ import com.crystal.store.enums.Enums.UserType;
 import com.crystal.store.exception.InternalServerErrorException;
 import com.crystal.store.model.UserModel;
 import com.crystal.store.repository.UserRepository;
-import com.crystal.store.utils.Helper;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
 
-    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -32,8 +30,6 @@ public class UserService {
 
             throw new DataIntegrityViolationException("User with this email already exists");
         }
-        String encryptedPassword = Helper.passwordEncoder().encode(user.getPassword());
-        user.setPassword(encryptedPassword);
         if (user.getUserType() == null) {
             user.setUserType(UserType.USER);
         }
@@ -96,7 +92,7 @@ public class UserService {
 
     }
 
-    public UserModel findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public UserModel findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
