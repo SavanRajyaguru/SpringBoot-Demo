@@ -6,16 +6,18 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crystal.store.config.JWTConfig;
 import com.crystal.store.dto.AuthRequest;
 import com.crystal.store.dto.AuthResponse;
 import com.crystal.store.dto.RegisterRequest;
 import com.crystal.store.model.UserModel;
+import com.crystal.store.services.JwtService;
 import com.crystal.store.services.UserService;
 import com.crystal.store.utils.Helper;
 
@@ -29,7 +31,10 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
-    private JWTConfig jwtConfig;
+    private JwtService jwtService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -48,7 +53,7 @@ public class AuthController {
         map.put("username", savedUser.getUsername());
         map.put("userType", savedUser.getUserType().toString());
         map.put("status", savedUser.getStatus().toString());
-        String token = jwtConfig.generateToken(map);
+        String token = jwtService.generateToken(map);
 
         // Create response
         AuthResponse response = AuthResponse.builder()
@@ -65,7 +70,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest loginRequest) {
-
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         // Find user by email
         System.out.println("Email: " + loginRequest.getEmail());
         UserModel user = userService.findByEmail(loginRequest.getEmail());
@@ -87,7 +93,7 @@ public class AuthController {
         map.put("username", user.getUsername());
         map.put("userType", user.getUserType().toString());
         map.put("status", user.getStatus().toString());
-        String token = jwtConfig.generateToken(map);
+        String token = jwtService.generateToken(map);
 
         // Create response
         AuthResponse response = AuthResponse.builder()
