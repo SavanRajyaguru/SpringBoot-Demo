@@ -70,41 +70,48 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        // Find user by email
-        System.out.println("Email: " + loginRequest.getEmail());
-        UserModel user = userService.findByEmail(loginRequest.getEmail());
-        System.out.println("User: " + user);
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            // Find user by email
+            System.out.println("Email: " + loginRequest.getEmail());
+            UserModel user = userService.findByEmail(loginRequest.getEmail());
+            System.out.println("User: " + user);
 
-        // Check if user exists and password is correct
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(AuthResponse.builder().message("Invalid username or password").build());
+            // Check if user exists and password is correct
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(AuthResponse.builder().message("Invalid username or password").build());
+            }
+
+            // if (!Helper.passwordEncoder().matches(loginRequest.getPassword(),
+            // user.getPassword())) {
+            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            // .body(AuthResponse.builder().message("Invalid username or
+            // password").build());
+            // }
+
+            // Generate JWT token
+            Map<String, String> map = new HashMap<>();
+            map.put("username", user.getUsername());
+            map.put("userType", user.getUserType().toString());
+            map.put("status", user.getStatus().toString());
+            String token = jwtService.generateToken(map);
+
+            // Create response
+            AuthResponse response = AuthResponse.builder()
+                    .token(token)
+                    .userId(user.getId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .userType(user.getUserType())
+                    .message("Login successful")
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AuthResponse.builder().message("Something went wrong").build());
         }
-
-        if (!Helper.passwordEncoder().matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(AuthResponse.builder().message("Invalid username or password").build());
-        }
-
-        // Generate JWT token
-        Map<String, String> map = new HashMap<>();
-        map.put("username", user.getUsername());
-        map.put("userType", user.getUserType().toString());
-        map.put("status", user.getStatus().toString());
-        String token = jwtService.generateToken(map);
-
-        // Create response
-        AuthResponse response = AuthResponse.builder()
-                .token(token)
-                .userId(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .userType(user.getUserType())
-                .message("Login successful")
-                .build();
-
-        return ResponseEntity.ok(response);
     }
 }
