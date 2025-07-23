@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,23 +76,7 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
             // Find user by email
-            System.out.println("Email: " + loginRequest.getEmail());
             UserModel user = userService.findByEmail(loginRequest.getEmail());
-            System.out.println("User: " + user);
-
-            // Check if user exists and password is correct
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(AuthResponse.builder().message("Invalid username or password").build());
-            }
-
-            // if (!Helper.passwordEncoder().matches(loginRequest.getPassword(),
-            // user.getPassword())) {
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            // .body(AuthResponse.builder().message("Invalid username or
-            // password").build());
-            // }
-
             // Generate JWT token
             Map<String, String> map = new HashMap<>();
             map.put("username", user.getUsername());
@@ -109,9 +95,12 @@ public class AuthController {
                     .build();
 
             return ResponseEntity.ok(response);
+        } catch (UsernameNotFoundException | BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthResponse.builder().message(e.getMessage()).build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(AuthResponse.builder().message("Something went wrong").build());
+                    .body(AuthResponse.builder().message(e.getMessage()).build());
         }
     }
 }

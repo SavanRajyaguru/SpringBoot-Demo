@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,13 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         String token = request.getHeader("Authorization");
-        System.out.println("Token>>>>>>>: " + token);
         if (token != null) {
-            String data = jwtService.extractDataFromToken(token);
-            System.out.println("Data>>>>>>>: " + data);
+            Map<String, String> data = jwtService.extractDataFromToken(token);
             if (jwtService.validateToken(token)) {
                 try {
-                    UserModel user = userService.findByEmail(data);
+                    UserModel user = userService.findByUsername(data.get("username"));
                     if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         // Create authentication object
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

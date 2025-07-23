@@ -2,11 +2,13 @@ package com.crystal.store.services;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -27,9 +29,17 @@ public class JwtService {
         return jwtToken;
     }
 
-    public String extractDataFromToken(String token) {
-        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8))).build()
-                .parseSignedClaims(token).getPayload().getSubject();
+    public Map<String, String> extractDataFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        Map<String, String> data = new HashMap<>();
+        for (Map.Entry<String, Object> entry : claims.entrySet()) {
+            data.put(entry.getKey(), entry.getValue().toString());
+        }
+        return data;
     }
 
     public boolean validateToken(String token) {
